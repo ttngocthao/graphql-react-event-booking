@@ -1,0 +1,19 @@
+.navbar {
+  color: palevioletred;
+}
+
+.navItem {
+  list-style: none;
+
+  a {
+    color: palevioletred;
+    text-decoration: none;
+    display: block;
+
+  }
+
+  a.active {
+    color: blue;
+  }
+
+}
