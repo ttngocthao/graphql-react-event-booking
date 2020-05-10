@@ -17,13 +17,14 @@ function App() {
           <MainNavigation />
           <main>
             <Switch>
+              <Route path="/events" exact component={EventsPage} />
               {!state.isAuthenticated && (
                 <>
                   <Redirect to="/auth" exact />
                   <Route path="/auth" exact component={AuthPage} />
                 </>
               )}
-              <Route path="/events" exact component={EventsPage} />
+
               {state.isAuthenticated && (
                 <>
                   <Redirect from="/" to="/events" exact />
