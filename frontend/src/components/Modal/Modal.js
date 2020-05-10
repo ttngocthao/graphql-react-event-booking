@@ -26,7 +26,7 @@ Modal.propTypes = {
   title: PropTypes.string,
   canCanel: PropTypes.bool,
   canConfirm: PropTypes.bool,
-  children: PropTypes.element,
+  children: PropTypes.array,
   cancelHandler: PropTypes.func,
   submitHandler: PropTypes.func,
 };

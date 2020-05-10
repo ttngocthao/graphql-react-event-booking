@@ -17,9 +17,9 @@ export const reducer = (state, action) => {
   switch (action.type) {
     case "LOGIN":
       //for local storage
-      console.log("from context - login", action.payload);
-      localStorage.setItem("userId", JSON.stringify(action.payload.userId));
-      localStorage.setItem("token", JSON.stringify(action.payload.token));
+
+      // localStorage.setItem("userId", JSON.stringify(action.payload.userId));
+      // localStorage.setItem("token", JSON.stringify(action.payload.token));
       return {
         ...state,
         isAuthenticated: true,
@@ -27,7 +27,7 @@ export const reducer = (state, action) => {
         token: action.payload.token,
       };
     case "LOGOUT":
-      localStorage.clear();
+      // localStorage.clear();
       return { ...state, isAuthenticated: false, userId: null };
     default:
       return state;
