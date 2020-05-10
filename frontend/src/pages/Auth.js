@@ -1,12 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import styles from "./auth.module.scss";
-
+import { AuthContext } from "../context/auth-context";
 function Auth() {
+  const { dispatch } = useContext(AuthContext);
   const [isLogIn, setLogIn] = useState(true);
   const switchModeHandler = () => {
     setLogIn(!isLogIn);
-    console.log(isLogIn);
   };
 
   return (
@@ -28,7 +28,6 @@ function Auth() {
           return errors;
         }}
         onSubmit={(data) => {
-          // console.log(data);
           let requestBody = {
             query: `
               query{
@@ -70,7 +69,13 @@ function Auth() {
               return res.json();
             })
             .then((resData) => {
-              console.log(resData);
+              //token is return here
+              if (resData.data.login.token) {
+                dispatch({
+                  type: "LOGIN",
+                  payload: resData.data.login,
+                });
+              }
             })
             .catch((errors) => {
               console.log(errors); //errors from browser

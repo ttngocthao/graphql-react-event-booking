@@ -1,9 +1,14 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Link, NavLink } from "react-router-dom";
+
+import { AuthContext } from "../../context/auth-context";
 
 import styles from "./mainNavigation.module.scss";
 //NavLink :props can be specified
-function MainNavigation() {
+function MainNavigation(props) {
+  console.log("props from main navigation", props);
+  const { dispatch, state } = useContext(AuthContext);
+  const { isAuthenticated } = state;
   return (
     <header>
       <div className="main-nav__logo">
@@ -11,15 +16,28 @@ function MainNavigation() {
       </div>
       <nav className={styles.navbar}>
         <ul>
-          <li className={styles.navItem}>
-            <NavLink to="/auth">Authenticate</NavLink>
-          </li>
+          {!isAuthenticated && (
+            <li className={styles.navItem}>
+              <NavLink to="/auth">Authenticate</NavLink>
+            </li>
+          )}
+
           <li className={styles.navItem}>
             <NavLink to="/events">Events</NavLink>
           </li>
-          <li className={styles.navItem}>
-            <NavLink to="/bookings">Bookings</NavLink>
-          </li>
+          {isAuthenticated && (
+            <>
+              <li className={styles.navItem}>
+                <NavLink to="/bookings">Bookings</NavLink>
+              </li>
+              <li
+                className={styles.navItem}
+                onClick={() => dispatch({ type: "LOGOUT" })}
+              >
+                Logout
+              </li>
+            </>
+          )}
         </ul>
       </nav>
     </header>
