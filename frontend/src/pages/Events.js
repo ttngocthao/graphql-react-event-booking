@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import Modal from "../components/Modal/Modal";
 
@@ -6,12 +6,48 @@ import { AuthContext } from "../context/auth-context";
 
 function Events() {
   const [isModalOpened, setModalOpened] = useState(false);
+  const [eventsData, setEventsData] = useState(null);
   const { state } = useContext(AuthContext);
   const { token, isAuthenticated } = state;
   const cancelHandler = () => {
     setModalOpened(false);
   };
-  //console.log("token", token, "isAuthenticated", isAuthenticated);
+  const getAllEvents = () => {
+    const requestBody = {
+      query: `query{
+              events{                  
+                _id
+                date
+                title
+                price 
+                description
+                creator{
+                  email
+                } 
+              }
+            }`,
+    };
+    fetch("http://localhost:5000/graphql", {
+      method: "POST",
+      body: JSON.stringify(requestBody),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => {
+        if (res.status !== 200 && res.status !== 201) {
+          throw new Error("Failed!");
+        }
+        return res.json();
+      })
+      .then((resData) => {
+        // console.log("successufully get all events", resData);
+        setEventsData(resData.data.events);
+      });
+  };
+  useEffect(() => {
+    getAllEvents();
+  }, []);
   return (
     <div>
       <h1>This is Events page</h1>
@@ -38,7 +74,7 @@ function Events() {
               }
               return errors;
             }}
-            onSubmit={(data) => {
+            onSubmit={(data, { resetForm }) => {
               data.price = +data.price; //convert price string to number
               const requestBody = {
                 query: `mutation{
@@ -67,10 +103,13 @@ function Events() {
                   return res.json();
                 })
                 .then((resData) => {
-                  console.log("successufully create an event", resData);
+                  // console.log("successufully create an event", resData);
+                  getAllEvents();
+                  setModalOpened(false);
+                })
+                .catch((err) => {
+                  console.log(err);
                 });
-
-              //console.log(data);
             }}
           >
             <Form>
@@ -113,6 +152,18 @@ function Events() {
           </button>
         )
       )}
+      <ul>
+        {eventsData &&
+          eventsData.map((item, index) => {
+            return (
+              <li key={index}>
+                <h5>{item.title}</h5>
+                <p>{item.price}</p>
+                <div>{item.description}</div>
+              </li>
+            );
+          })}
+      </ul>
     </div>
   );
 }
