@@ -8,6 +8,8 @@ function Modal({
   children,
   cancelHandler,
   submitHandler,
+  confirmText,
+  cancelText,
 }) {
   return (
     <div className={styles.layout}>
@@ -15,8 +17,16 @@ function Modal({
         <h2 className={styles.title}>{title}</h2>
         <section className={styles.body}>{children}</section>
         <div className={styles.btnWrap}>
-          {canCanel && <button onClick={cancelHandler}>Cancel</button>}
-          {canConfirm && <button onClick={submitHandler}>Confirm</button>}
+          {canCanel && (
+            <button onClick={cancelHandler}>
+              {cancelText ? cancelText : "Cancel"}
+            </button>
+          )}
+          {canConfirm && (
+            <button onClick={submitHandler}>
+              {confirmText ? confirmText : "Confirm"}
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -24,6 +34,8 @@ function Modal({
 }
 Modal.propTypes = {
   title: PropTypes.string,
+  cancelText: PropTypes.string,
+  confirmText: PropTypes.string,
   canCanel: PropTypes.bool,
   canConfirm: PropTypes.bool,
   children: PropTypes.array,

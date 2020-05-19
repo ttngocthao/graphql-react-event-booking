@@ -3,12 +3,15 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import Modal from "../components/Modal/Modal";
 
 import { AuthContext } from "../context/auth-context";
+import EventList from "../components/Events/EventList";
+import Spinner from "../components/Spinner/Spinner";
 
 function Events() {
   const [isModalOpened, setModalOpened] = useState(false);
+  const [pageIsLoading, setPageIsLoading] = useState(false);
   const [eventsData, setEventsData] = useState(null);
   const { state } = useContext(AuthContext);
-  const { token, isAuthenticated } = state;
+  const { token, isAuthenticated, userId } = state;
   const cancelHandler = () => {
     setModalOpened(false);
   };
@@ -23,10 +26,12 @@ function Events() {
                 description
                 creator{
                   email
+                  _id
                 } 
               }
             }`,
     };
+    setPageIsLoading(true);
     fetch("http://localhost:5000/graphql", {
       method: "POST",
       body: JSON.stringify(requestBody),
@@ -43,6 +48,11 @@ function Events() {
       .then((resData) => {
         // console.log("successufully get all events", resData);
         setEventsData(resData.data.events);
+        setPageIsLoading(false);
+      })
+      .catch((err) => {
+        console.log("Errors: ", err);
+        setPageIsLoading(false);
       });
   };
   useEffect(() => {
@@ -152,18 +162,11 @@ function Events() {
           </button>
         )
       )}
-      <ul>
-        {eventsData &&
-          eventsData.map((item, index) => {
-            return (
-              <li key={index}>
-                <h5>{item.title}</h5>
-                <p>{item.price}</p>
-                <div>{item.description}</div>
-              </li>
-            );
-          })}
-      </ul>
+      {pageIsLoading ? (
+        <Spinner />
+      ) : (
+        <EventList eventsData={eventsData} userId={userId} />
+      )}
     </div>
   );
 }
