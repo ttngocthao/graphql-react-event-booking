@@ -1,7 +1,40 @@
 import React, { useState } from "react";
 import Modal from "../Modal/Modal";
-function EventItem({ item, userId }) {
+function EventItem({ item, userId, token }) {
   const [isEventDetailOpened, setisEventDetailOpened] = useState(false);
+  const bookEventHandler = () => {
+    const requestBody = {
+      query: `mutation {
+        bookEvent(eventId:"${item._id}"){
+          _id
+          createdAt
+          updatedAt
+       }
+       } `,
+    };
+    fetch("http://localhost:5000/graphql", {
+      method: "POST",
+      body: JSON.stringify(requestBody),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (res.status !== 200 && res.status !== 201) {
+          throw new Error("Failed!");
+        }
+        return res.json();
+      })
+      .then((resData) => {
+        console.log("successufully book this event", resData);
+        setisEventDetailOpened(false);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+    // console.log("book this", item._id, "token", token);
+  };
   return (
     <li>
       <h5>{item.title}</h5>
@@ -31,9 +64,7 @@ function EventItem({ item, userId }) {
           cancelText="Close"
           confirmText="Book this event"
           canConfirm={userId ? true : false}
-          submitHandler={() => {
-            console.log("book this please");
-          }}
+          submitHandler={bookEventHandler}
           cancelHandler={() => setisEventDetailOpened(false)}
         >
           <p>Price: £{item.price}</p>

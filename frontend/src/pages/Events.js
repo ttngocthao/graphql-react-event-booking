@@ -9,12 +9,14 @@ import Spinner from "../components/Spinner/Spinner";
 function Events() {
   const [isModalOpened, setModalOpened] = useState(false);
   const [pageIsLoading, setPageIsLoading] = useState(false);
+  const [isPageActive, setPageActive] = useState(true);
   const [eventsData, setEventsData] = useState(null);
   const { state } = useContext(AuthContext);
   const { token, isAuthenticated, userId } = state;
   const cancelHandler = () => {
     setModalOpened(false);
   };
+
   const getAllEvents = () => {
     const requestBody = {
       query: `query{
@@ -47,17 +49,24 @@ function Events() {
       })
       .then((resData) => {
         // console.log("successufully get all events", resData);
-        setEventsData(resData.data.events);
-        setPageIsLoading(false);
+        if (isPageActive) {
+          setEventsData(resData.data.events);
+          setPageIsLoading(false);
+        }
       })
       .catch((err) => {
         console.log("Errors: ", err);
-        setPageIsLoading(false);
+        if (isPageActive) {
+          setPageIsLoading(false);
+        }
       });
   };
-  useEffect(() => {
-    getAllEvents();
-  }, []);
+  // useEffect(() => {
+  //   getAllEvents();
+  //   return () => {
+  //     setPageActive(false);
+  //   };
+  // }, []);
   return (
     <div>
       <h1>This is Events page</h1>
@@ -165,7 +174,7 @@ function Events() {
       {pageIsLoading ? (
         <Spinner />
       ) : (
-        <EventList eventsData={eventsData} userId={userId} />
+        <EventList eventsData={eventsData} userId={userId} token={token} />
       )}
     </div>
   );
