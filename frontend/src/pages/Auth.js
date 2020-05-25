@@ -1,10 +1,11 @@
 import React, { useState, useContext } from "react";
+
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import styles from "./auth.module.scss";
-import { AuthContext } from "../context/auth-context";
-function Auth() {
-  const { dispatch } = useContext(AuthContext);
+import { AuthContext } from "../App";
+function Auth(props) {
   const [isLogIn, setLogIn] = useState(true);
+  const authContext = useContext(AuthContext);
   const switchModeHandler = () => {
     setLogIn(!isLogIn);
   };
@@ -71,7 +72,7 @@ function Auth() {
             .then((resData) => {
               //token is return here
               if (resData.data.login.token) {
-                dispatch({
+                authContext.dispatch({
                   type: "LOGIN",
                   payload: resData.data.login,
                 });
@@ -80,6 +81,8 @@ function Auth() {
             .catch((errors) => {
               console.log(errors); //errors from browser
             });
+          // console.log("data submitted", data);
+          props.history.push("/events");
         }}
       >
         <Form name="user-form">

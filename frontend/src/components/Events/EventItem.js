@@ -1,7 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import Modal from "../Modal/Modal";
-function EventItem({ item, userId, token }) {
+import { AuthContext } from "../../App";
+
+function EventItem({ item }) {
   const [isEventDetailOpened, setisEventDetailOpened] = useState(false);
+  const authContext = useContext(AuthContext);
+  const { userId, token } = authContext.state;
   const bookEventHandler = () => {
     const requestBody = {
       query: `mutation {

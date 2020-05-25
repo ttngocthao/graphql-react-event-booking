@@ -6,9 +6,7 @@ function EventList({ eventsData, userId, token }) {
     <ul>
       {eventsData &&
         eventsData.map((item, index) => {
-          return (
-            <EventItem key={index} item={item} userId={userId} token={token} />
-          );
+          return <EventItem key={index} item={item} />;
         })}
     </ul>
   );

@@ -7,36 +7,54 @@ import MainNavigation from "./components/Navigation/MainNavigation";
 import "./App.css";
 
 // import { AuthContext, reducer, initialState } from "./context/auth-context";
-import Testing from "./pages/Testing";
+export const AuthContext = React.createContext();
+const initialState = { isAuthenticated: false, token: null, userId: null };
+const reducer = (state, action) => {
+  switch (action.type) {
+    case "LOGIN":
+      console.log(action.payload);
+      return {
+        ...state,
+        isAuthenticated: true,
+        token: action.payload.token,
+        userId: action.payload.userId,
+      };
+    case "LOGOUT":
+      return {
+        ...state,
+        isAuthenticated: false,
+        token: null,
+        userId: null,
+      };
+    default:
+      return {
+        ...state,
+      };
+  }
+};
 
 function App() {
-  //  const [state, dispatch] = useReducer(reducer, initialState);
+  const [state, dispatch] = useReducer(reducer, initialState);
+  // const [state,updateState]= useState()
+  console.log("state from app.js", state);
+
   return (
     <BrowserRouter className="App">
       <>
-        {/* <AuthContext.Provider value={{ state, dispatch }}> */}
-        <MainNavigation />
-        <main>
-          <Switch>
-            <Route path="/events" exact component={EventsPage} />
-            {/* {!state.isAuthenticated && (
-                <> */}
-            {/* <Redirect to="/auth" exact /> */}
-            <Route path="/auth" exact component={AuthPage} />
-            {/* </>
-              )} */}
-
-            {/* {state.isAuthenticated && (
-                <> */}
-            {/* <Redirect from="/" to="/events" exact /> */}
-            {/* <Redirect from="/auth" to="/events" exact /> */}
-            {/* </>
-              )} */}
-            <Route path="/bookings" exact component={BookingsPage} />
-            <Route path="/testing" exact component={Testing} />
-          </Switch>
-        </main>
-        {/* </AuthContext.Provider> */}
+        <AuthContext.Provider value={{ state: state, dispatch: dispatch }}>
+          <MainNavigation />
+          <main>
+            <Switch>
+              <Route path="/auth" exact component={AuthPage} />
+              <Route path="/events" exact component={EventsPage} />
+              {!state.isAuthenticated ? (
+                <Redirect from="/bookings" to="/auth" exact />
+              ) : (
+                <Route path="/bookings" exact component={BookingsPage} />
+              )}
+            </Switch>
+          </main>
+        </AuthContext.Provider>
       </>
     </BrowserRouter>
   );
