@@ -1,20 +1,18 @@
 import React, { useState, useContext, useEffect } from "react";
-import { Formik, Form, Field, ErrorMessage } from "formik";
+
 import Modal from "../components/Modal/Modal";
 
-import { AuthContext } from "../context/auth-context";
+//import { AuthContext } from "../context/auth-context";
 import EventList from "../components/Events/EventList";
 import Spinner from "../components/Spinner/Spinner";
-
+import { AuthContext } from "../App";
+import AddEventForm from "../components/Events/AddEventForm";
 function Events() {
-  const [isModalOpened, setModalOpened] = useState(false);
-  const [pageIsLoading, setPageIsLoading] = useState(false);
   const [eventsData, setEventsData] = useState(null);
-  const { state } = useContext(AuthContext);
-  const { token, isAuthenticated, userId } = state;
-  const cancelHandler = () => {
-    setModalOpened(false);
-  };
+  const [isModalOpened, setModalOpened] = useState(false);
+  const authContext = useContext(AuthContext);
+  const { isAuthenticated } = authContext.state;
+  // console.log("state from events page", AuthContext.state);
   const getAllEvents = () => {
     const requestBody = {
       query: `query{
@@ -31,7 +29,6 @@ function Events() {
               }
             }`,
     };
-    setPageIsLoading(true);
     fetch("http://localhost:5000/graphql", {
       method: "POST",
       body: JSON.stringify(requestBody),
@@ -48,11 +45,9 @@ function Events() {
       .then((resData) => {
         // console.log("successufully get all events", resData);
         setEventsData(resData.data.events);
-        setPageIsLoading(false);
       })
       .catch((err) => {
         console.log("Errors: ", err);
-        setPageIsLoading(false);
       });
   };
   useEffect(() => {
@@ -61,112 +56,28 @@ function Events() {
   return (
     <div>
       <h1>This is Events page</h1>
-      {isModalOpened ? (
-        <Modal title="Add event">
-          <h2>Form will be here</h2>
-          <Formik
-            initialValues={{
-              title: "",
-              description: "",
-              price: "",
-              date: "",
-            }}
-            validate={(vals) => {
-              const errors = {};
-              if (!vals.title) {
-                errors.title = "Event title cannot be empty";
-              }
-              if (!vals.description) {
-                errors.description = "Event description cannot be empty!";
-              }
-              if (!vals.price) {
-                errors.price = "Event price cannot be empty!";
-              }
-              return errors;
-            }}
-            onSubmit={(data, { resetForm }) => {
-              data.price = +data.price; //convert price string to number
-              const requestBody = {
-                query: `mutation{
-                  createEvent(args: {
-                    title:"${data.title}",
-                    description: "${data.description}",
-                    price: ${data.price},
-                    date: "${data.date}"
-                 }){		
-                   title
-                  _id }
-                 }`,
-              };
-              fetch("http://localhost:5000/graphql", {
-                method: "POST",
-                body: JSON.stringify(requestBody),
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${token}`,
-                },
-              })
-                .then((res) => {
-                  if (res.status !== 200 && res.status !== 201) {
-                    throw new Error("Failed!");
-                  }
-                  return res.json();
-                })
-                .then((resData) => {
-                  // console.log("successufully create an event", resData);
-                  getAllEvents();
-                  setModalOpened(false);
-                })
-                .catch((err) => {
-                  console.log(err);
-                });
-            }}
-          >
-            <Form>
-              <div>
-                <label htmlFor="title">Title</label>
-                <Field name="title" type="text" />
-                <ErrorMessage name="title" />
-              </div>
-
-              <div>
-                <label htmlFor="price">Price</label>
-                <Field name="price" type="number" />
-                <ErrorMessage name="price" />
-              </div>
-              <div>
-                <label htmlFor="date">Date</label>
-                <Field name="date" type="datetime-local" />
-                <ErrorMessage name="date" />
-              </div>
-              <div>
-                <label htmlFor="description">Description</label>
-                <Field as="textarea" type="text" name="description" rows="4" />
-                <ErrorMessage name="description" />
-              </div>
-              <div>
-                <button type="submit">Create this event</button>
-                <button onClick={cancelHandler}>Cancel</button>
-              </div>
-            </Form>
-          </Formik>
+      {isAuthenticated && (
+        <button
+          onClick={() => {
+            setModalOpened(true);
+          }}
+        >
+          Create an event +
+        </button>
+      )}
+      {isModalOpened && (
+        <Modal
+          canCanel={true}
+          cancelHandler={() => setModalOpened(false)}
+          cancelText={`Close`}
+        >
+          <AddEventForm
+            closeModal={() => setModalOpened(false)}
+            updateEvents={getAllEvents}
+          />
         </Modal>
-      ) : (
-        isAuthenticated && (
-          <button
-            onClick={() => {
-              setModalOpened(true);
-            }}
-          >
-            Create an event +
-          </button>
-        )
       )}
-      {pageIsLoading ? (
-        <Spinner />
-      ) : (
-        <EventList eventsData={eventsData} userId={userId} />
-      )}
+      {eventsData ? <EventList eventsData={eventsData} /> : <Spinner />}
     </div>
   );
 }

@@ -1,14 +1,22 @@
 import React, { useContext } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
-import { AuthContext } from "../../context/auth-context";
+import { AuthContext } from "../../App";
 
 import styles from "./mainNavigation.module.scss";
 //NavLink :props can be specified
 function MainNavigation(props) {
-  console.log("props from main navigation", props);
-  const { dispatch, state } = useContext(AuthContext);
-  const { isAuthenticated } = state;
+  // const { dispatch, state } = useContext(AuthContext);
+  // const { isAuthenticated } = state;
+  // console.log("state, from main navigation", state);
+  const authContext = useContext(AuthContext);
+  const { isAuthenticated } = authContext.state;
+  //console.log("props.history", props.history);
+  const logOutHandler = () => {
+    authContext.dispatch({
+      type: "LOGOUT",
+    });
+  };
   return (
     <header>
       <div className="main-nav__logo">
@@ -21,6 +29,7 @@ function MainNavigation(props) {
               <NavLink to="/auth">Authenticate</NavLink>
             </li>
           )}
+          {/* )} */}
 
           <li className={styles.navItem}>
             <NavLink to="/events">Events</NavLink>
@@ -30,10 +39,7 @@ function MainNavigation(props) {
               <li className={styles.navItem}>
                 <NavLink to="/bookings">Bookings</NavLink>
               </li>
-              <li
-                className={styles.navItem}
-                onClick={() => dispatch({ type: "LOGOUT" })}
-              >
+              <li className={styles.navItem} onClick={logOutHandler}>
                 Logout
               </li>
             </>
